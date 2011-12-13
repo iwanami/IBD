@@ -79,8 +79,8 @@ class Glb {
 
 //----------------------------------------------------------
 class VueSaisie extends JPanel {
-        JTextField request = new JTextField("requete");
-        JTextArea question = new JTextArea("JTan");
+        JTextField request = new JTextField(Glb.reponses[0]);
+        JTextArea question = new JTextArea(Glb.questions[0]);
 	public VueSaisie() {
 			setLayout(new GridLayout(1, 2));
 			add (request);
@@ -123,10 +123,16 @@ class VueTables extends JPanel {
     JTable request = new JTable();
 	public VueTables() {
 			setLayout(new BorderLayout());
-			//add (new JTable(), BorderLayout.WEST);
+			add (new JTable().getTableHeader(), BorderLayout.NORTH);
 			add (request, BorderLayout.CENTER);
 			//add (new JTable(), BorderLayout.EAST);
 	}
+        
+        public void setTable(JTable table){
+                removeAll();
+                add(table, BorderLayout.CENTER);
+                add(table.getTableHeader(), BorderLayout.NORTH);
+        }
 }
 //----------------------------------------------------------
 class VuePrincipale extends JPanel {
@@ -148,18 +154,27 @@ class VuePrincipale extends JPanel {
                     public void actionPerformed(ActionEvent e){
                         String cmd = e.getActionCommand();
                         if(cmd.equals(Glb.ok)){
-                            System.out.println("prout");
-                            processRequest();
+                            String request = saisie.request.getText();
+                            if (request.equals(Glb.reponses[q_count])){
+                                saisie.question.setText(Glb.questions[++q_count%Glb.question_count]);
+                                processRequest();
+                            }
+                            else{
+                                saisie.request.setText("mauvaise reponse!");
+                            }
+                            
                         }
                         else if(cmd.equals(Glb.cancel)){
                             saisie.request.setText("requete");
                         }
                         else if(cmd.equals(Glb.next)){
-                            saisie.question.setText(Glb.questions[++q_count%Glb.question_count]);
+                            q_count = ++q_count%Glb.question_count;
+                            saisie.question.setText(Glb.questions[q_count]);
                             
                         }
                         else if(cmd.equals(Glb.prev)){
-                            saisie.question.setText(Glb.questions[--q_count%Glb.question_count]);
+                            q_count = --q_count%Glb.question_count;
+                            saisie.question.setText(Glb.questions[q_count]);
                         }
                         else if(cmd.equals(Glb.corr)){
                             saisie.request.setText(Glb.reponses[q_count]);
@@ -178,10 +193,7 @@ class VuePrincipale extends JPanel {
         private void processRequest(){
             
             String request = saisie.request.getText();
-            if (request.equals(Glb.reponses[q_count])){
-                saisie.question.setText(Glb.questions[++q_count%Glb.question_count]);
-                
-            }
+            
             ResultSet rs = DBManager.request(con, request);
             int row_num = 0;
             String[] column_names;
@@ -199,19 +211,24 @@ class VuePrincipale extends JPanel {
                 data = new Object[row_count][column_count];
                 for(int i = 0; i < column_count; i++){
                     column_names[i] = rsmd.getColumnName(i+1);
+                    //System.out.println(column_names[i]);
                 }
                 
                 while(rs.next()){
                     for(int i = 0; i < column_count; i++){
-                        data[row_num][column_count] = rs.getObject(column_names[i]);
+                        data[row_num][i] = rs.getObject(column_names[i]);
+                        //System.out.print(data[row_num][i]+" | ");
                     }
+                    //System.out.println();
                     row_num++;
                 }
-                tables.request = new JTable(data, column_names);
+                JTable new_table = new JTable(data, column_names);
+                tables.setTable(new_table);
+                
             }
             catch(SQLException e){}
-            
-            
+            //this.validate();
+            //this.repaint();
         
         }
 	
@@ -241,12 +258,9 @@ class Controleur {
 public class NEWAmorce  {
 	public static void main (String [] args) {
             
-                String db = "localhost:8888/labo1";
-                String username = "";
-                String password = "";
-                
-                //Connection con = DBManager.connect(db, username, password);
-                
+                String db = "localhost:8889/labo1";
+                String username = "root";
+                String password = "root";
                 
 		new Controleur(db, username, password);
 	}

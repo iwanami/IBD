@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- ANT - fichier de base -->
+
+<project name="Standard" default="all" basedir=".">
+	<target name="init">
+		<!-- Nom logique des répertoires -->
+		<property name="warFile" value="Compteur.war"/>
+		<property name="root" value="${basedir}"/>
+		<property name="srcDir" value="${root}/src"/>
+		<property name="classesDir" value="${root}/build/classes"/>
+		<property name="tempDir" value="${root}/temp"/>
+		<property name="xmlDir" value="${root}/xml"/>
+		<property name="warDir" value="${root}/build/war"/>
+		<property name="webDir" value="${root}/web"/>
+		<property name="jarDir" value="${root}/jar"/>
+
+		<property name="jarFile" value="${root}/main.jar"/>
+		<property name="manifestFile" value="${root}/MANIFEST.MF" />
+
+		<!-- On cree nos repertoire temporaire -->   
+		<mkdir dir="${root}/build"/>   
+		<mkdir dir="${root}/build/classes"/>  
+		<mkdir dir="${root}/build/war"/>
+		<mkdir dir="${warDir}/WEB-INF"/>
+		<mkdir dir="${warDir}/WEB-INF/classes"/>
+		
+		<path id="jboss">
+			<pathelement path="${jarDir}/jboss-servlet-api_3.0_spec-1.0.0.Final.jar" />
+		</path>
+
+
+	</target>
+
+	<!-- on cree nos .class a partir des .java -->
+	<target name="build" depends="init">
+		<javac classpathref="jboss" includes="**/*.java" srcdir="${srcDir}" destdir="${classesDir}" debug="true" includeAntRuntime="no"  />
+	</target>
+
+	<!-- Creation du .war -->
+	<target name="buildWar" depends="init">
+		<copy todir="${warDir}/WEB-INF/classes">
+			<fileset dir="${classesDir}" includes="**/*.class" />
+		</copy>
+		
+		<copy todir="${warDir}">
+			<fileset dir="${webDir}" includes="**/*.*" />
+		</copy>
+	
+		<copy todir="${warDir}/WEB-INF">
+			<fileset dir="${xmlDir}" includes="web.xml" />
+		</copy>
+		
+		<jar jarfile="${root}/${warFile}" basedir="${warDir}" />
+		
+		<!-- <war destfile="${warFile}" webxml="${xmlDir}/web.xml">
+			<classes dir="${classesDir}" />
+		</war> -->
+
+	</target>
+
+	<!-- on supprime nos dossier temporaire -->
+	<target name="clean">
+		<delete dir="${classesDir}" />
+		<delete dir="${tempDir}" />
+	</target>
+	
+	<target name="all" depends="build,buildWar,clean">
+	</target>
+
+</project>

@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<!-- ................................................... -->
+<!-- Fichier de construction pour applications Web	-->
+<!-- build.xml, Juin 2011	-->
+<!-- Eric Lefrançois	-->
+<!-- ................................................... -->
+<!-- !!!!! Controler ou ajuster:	-->
+<!-- !!!!! valeur de "warFile" (voir target "init")	-->
+<!-- !!!!! valeur de "classpath" (voir target "build")	-->
+<project name="Jboss war" default="toJBoss" basedir=".">
+  <target name="init">
+    <!-- !!!!! AJUSTER LA VALEUR DE "warFile" !!!!!!!! -->
+    <property name="warFile" value="labo2.war"/>
+    <property name="root" value="${basedir}"/>
+    <property name="srcDir" value="${root}/src"/>
+    <property name="webDir" value="${root}/web"/>
+    <property name="classesDir" value="${root}/build/classes"/>
+    <property name="jarDir" value="${root}/jar"/>
+    <property name="xmlDir" value="${root}/xml"/>
+    <property name="warDir" value="${root}/build/war"/>
+    <!-- Création de WEB-INF et du répertoire de classes --> 
+    <mkdir dir="${root}/build"/>
+    <mkdir dir="${root}/build/war"/>
+    <mkdir dir="${root}/build/classes"/>
+    <mkdir dir="${warDir}/WEB-INF"/>
+    <mkdir dir="${warDir}/WEB-INF/classes"/>
+  </target>
+  <!-- Target principal --> <target name="all" depends="init,build,buildWar"/>
+  <!-- Construction -->
+  <!-- !!!!! AJUSTER LA VALEUR DE "classpath" !!!!!!!! -->
+  <target name="build" > <javac srcdir="${srcDir}"
+    Classpath="." destdir="${classesDir}" debug="true" includes="**/*.java" />
+  </target>
+  <!-- Création de l’archive .war .. -->
+  <target name="buildWar" depends="init">
+    <copy todir="${warDir}/WEB-INF/classes">
+      <fileset dir="${classesDir}" includes="**/*.class" />
+    </copy>
+    <copy todir="${warDir}/WEB-INF">
+      <fileset dir="${webDir}" includes="**/*.*" />
+    </copy>
+    <copy todir="${warDir}/WEB-INF">
+      <fileset dir="${xmlDir}" includes="web.xml" />
+    </copy>
+    <!-- Création du fichier war -->
+    <jar jarfile="${root}/${warFile}" basedir="${warDir}" />
+  </target>
+  <target name="toJBoss" depends="all">
+    <mkdir dir="/Applications/jboss-as-web-7.0.2.Final/standalone/deployments/labo2.war"/>
+    <copy todir="/Applications/jboss-as-web-7.0.2.Final/standalone/deployments">
+      <fileset dir="${root}" includes="**/*.*"/>
+    </copy>
+  </target>
+
+</project>
